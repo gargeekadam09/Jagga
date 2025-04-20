@@ -1,0 +1,31 @@
+Triggers
+
+1.Trigger 1: After INSERT on Booking -> Update Room Availability
+
+DELIMITER $$
+
+CREATE TRIGGER AfterBookingInsert
+AFTER INSERT ON booking
+FOR EACH ROW
+BEGIN
+    UPDATE room
+    SET Availability = 0
+    WHERE Room_ID = NEW.Room_ID;
+END$$
+
+DELIMITER ;
+
+2. Trigger 2: After DELETE on Booking → Set Room Back to Available
+
+DELIMITER $$
+
+CREATE TRIGGER AfterBookingDelete
+AFTER DELETE ON booking
+FOR EACH ROW
+BEGIN
+    UPDATE room
+    SET Availability = 1
+    WHERE Room_ID = OLD.Room_ID;
+END$$
+
+DELIMITER ;
