@@ -1,0 +1,163 @@
+1. 	GetGuestsAsXML
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetGuestsAsXML`()
+BEGIN
+    SELECT 
+        CONCAT(
+            '<Guests>',
+            GROUP_CONCAT(
+                CONCAT(
+                    '<Guest>',
+                        '<GuestID>', guest_id, '</GuestID>',
+                        '<Name>', name, '</Name>',
+                        '<Phone>', phone, '</Phone>',
+                        '<Email>', email, '</Email>',
+                        '<Address>', address, '</Address>',
+                    '</Guest>'
+                ) SEPARATOR ''
+            ),
+            '</Guests>'
+        ) AS GuestDetailsXML
+    FROM guest;
+END$$
+DELIMITER ;
+
+
+2. GetTotalPaymentsPerMethod
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetTotalPaymentsPerMethod`(IN min_total DECIMAL(10,2))
+BEGIN
+    SELECT 
+        Payment_Method,
+        SUM(Amount) AS Total_Amount
+    FROM 
+        payment
+    GROUP BY 
+        Payment_Method
+    HAVING 
+        Total_Amount >= min_total;
+END$$
+DELIMITER ;
+
+
+3.GuestBookingSummary
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GuestBookingSummary`()
+BEGIN
+    SELECT 
+        g.Guest_ID,
+        CONCAT(g.First_Name, ' ', g.Last_Name) AS Guest_Name,
+        COUNT(b.Booking_ID) AS Total_Bookings,
+        SUM(CalcNightsStayed(b.CheckIn_Date, b.CheckOut_Date)) AS Total_Nights_Stayed
+    FROM 
+        guest g
+    LEFT JOIN 
+        booking b ON g.Guest_ID = b.Guest_ID
+    LEFT JOIN 
+        room r ON b.Room_ID = r.Room_ID
+    GROUP BY 
+        g.Guest_ID;
+END$$
+DELIMITER ;
+
+4.	InsertBookingsFromXML
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `InsertBookingsFromXML`(IN xml_data TEXT)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE total INT;
+    DECLARE guest_id INT;
+    DECLARE room_id INT;
+    DECLARE checkin DATE;
+    DECLARE checkout DATE;
+
+    -- Temporary table to hold parsed XML
+    DROP TEMPORARY TABLE IF EXISTS temp_bookings;
+    CREATE TEMPORARY TABLE temp_bookings (
+        Guest_ID INT,
+        Room_ID INT,
+        CheckIn_Date DATE,
+        CheckOut_Date DATE
+    );
+
+    -- Insert parsed XML into temp table
+    INSERT INTO temp_bookings (Guest_ID, Room_ID, CheckIn_Date, CheckOut_Date)
+    SELECT 
+        ExtractValue(xml_nodes.node, '/booking/Guest_ID'),
+        ExtractValue(xml_nodes.node, '/booking/Room_ID'),
+        ExtractValue(xml_nodes.node, '/booking/CheckIn_Date'),
+        ExtractValue(xml_nodes.node, '/booking/CheckOut_Date')
+    FROM (
+        SELECT ExtractValue(xml_data, CONCAT('/bookings/booking[', numbers.n, ']')) AS node
+        FROM (
+            SELECT 1 AS n UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5
+            UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9 UNION SELECT 10
+        ) AS numbers
+        WHERE ExtractValue(xml_data, CONCAT('/bookings/booking[', numbers.n, ']')) IS NOT NULL
+    ) AS xml_nodes;
+
+    -- Insert into main booking table
+    INSERT INTO booking (Guest_ID, Room_ID, CheckIn_Date, CheckOut_Date)
+    SELECT Guest_ID, Room_ID, CheckIn_Date, CheckOut_Date FROM temp_bookings;
+
+    DROP TEMPORARY TABLE temp_bookings;
+END$$
+DELIMITER ;
+
+
+5. 	InsertPaymentsFromXML
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `InsertPaymentsFromXML`(IN xml_data TEXT)
+BEGIN
+    DECLARE i INT DEFAULT 1;
+    DECLARE total INT DEFAULT 0;
+
+    DECLARE booking_id INT;
+    DECLARE payment_date DATE;
+    DECLARE amount DECIMAL(10,2);
+    DECLARE payment_method VARCHAR(50);
+
+    -- Get number of <payment> nodes
+    SET total = ExtractValue(xml_data, 'count(/payments/payment)');
+
+    WHILE i <= total DO
+        SET booking_id = ExtractValue(xml_data, CONCAT('/payments/payment[', i, ']/Booking_ID'));
+        SET payment_date = ExtractValue(xml_data, CONCAT('/payments/payment[', i, ']/Payment_Date'));
+        SET amount = ExtractValue(xml_data, CONCAT('/payments/payment[', i, ']/Amount'));
+        SET payment_method = ExtractValue(xml_data, CONCAT('/payments/payment[', i, ']/Payment_Method'));
+
+        INSERT INTO payment (Booking_ID, Payment_Date, Amount, Payment_Method)
+        VALUES (booking_id, payment_date, amount, payment_method);
+
+        SET i = i + 1;
+    END WHILE;
+END$$
+DELIMITER ;
+
+
+6.InsertSingleGuestFromXML
+
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `InsertSingleGuestFromXML`(IN xml_data TEXT)
+BEGIN
+  DECLARE v_name VARCHAR(100);
+  DECLARE v_phone VARCHAR(20);
+  DECLARE v_email VARCHAR(100);
+  DECLARE v_address VARCHAR(255);
+
+  -- Extract values using ExtractValue
+  SET v_name = ExtractValue(xml_data, '/Guest/name');
+  SET v_phone = ExtractValue(xml_data, '/Guest/phone');
+  SET v_email = ExtractValue(xml_data, '/Guest/email');
+  SET v_address = ExtractValue(xml_data, '/Guest/address');
+
+  -- Insert into table
+  INSERT INTO guest(name, phone, email, address)
+  VALUES (v_name, v_phone, v_email, v_address);
+END$$
+DELIMITER ;
