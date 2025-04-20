@@ -1,10 +1,9 @@
 Triggers
 
-1.Trigger 1: After INSERT on Booking -> Update Room Availability
+1.Trigger 1: trg_UpdateRoomAvailability
 
 DELIMITER $$
-
-CREATE TRIGGER AfterBookingInsert
+CREATE TRIGGER trg_UpdateRoomAvailability
 AFTER INSERT ON booking
 FOR EACH ROW
 BEGIN
@@ -15,11 +14,10 @@ END$$
 
 DELIMITER ;
 
-2. Trigger 2: After DELETE on Booking → Set Room Back to Available
+2. Trigger 2:. trg_RestoreRoomAvailability
 
 DELIMITER $$
-
-CREATE TRIGGER AfterBookingDelete
+CREATE TRIGGER trg_RestoreRoomAvailability
 AFTER DELETE ON booking
 FOR EACH ROW
 BEGIN
@@ -27,5 +25,4 @@ BEGIN
     SET Availability = 1
     WHERE Room_ID = OLD.Room_ID;
 END$$
-
 DELIMITER ;
