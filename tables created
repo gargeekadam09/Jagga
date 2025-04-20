@@ -1,0 +1,116 @@
+ /* Total Six tables to be created */
+ 1. hotel 
+ 2. booking 
+ 3. guest
+ 4. payment 
+ 5. room
+ 6. staff
+
+
+ ## hotel table
+ CREATE TABLE hotel (
+    hotel_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    phone VARCHAR(15),
+    email VARCHAR(100),
+    address VARCHAR(255)
+);
+
+ Insertion of Data
+
+INSERT INTO hotel (hotel_id, name, phone, email, address) VALUES
+(1, 'Grand Palace Hotel', '9876543210', 'info@grandpalace.com', '123 Royal Street, London'),
+(2, 'Ocean View Resort', '9123456780', 'contact@oceanview.com', '456 Seaside Road, Brighton'),
+(3, 'Mountain Retreat', '9988776655', 'stay@mountainretreat.com', '789 Hilltop Lane, Edinburgh'),
+(4, 'City Central Inn', '9012345678', 'central@cityinn.com', '321 High Street, Manchester'),
+(5, 'Sunset Boulevard Hotel', '9765432109', 'hello@sunsetblvd.com', '654 Sunset Ave, Liverpool');
+
+
+##booking table
+
+CREATE TABLE booking (
+    booking_id INT PRIMARY KEY,
+    guest_id INT,
+    room_id INT,
+    checkin_date DATE,
+    checkout_date DATE
+);
+
+Insertion of Data
+INSERT INTO booking (booking_id, guest_id, room_id, checkin_date, checkout_date) VALUES
+(6, 1, 1, '2025-05-01', '2025-05-05'),
+(7, 2, 2, '2025-06-10', '2025-06-15'),
+(8, 3, 3, '2025-07-20', '2025-07-25'),
+(9, 4, 4, '2025-08-05', '2025-08-08'),
+(10, 5, 5, '2025-09-12', '2025-09-17');
+
+## guest table
+CREATE TABLE guest (
+    guest_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    phone VARCHAR(15),
+    email VARCHAR(100),
+    address VARCHAR(255)
+);
+
+Insertion of Data
+INSERT INTO guest (guest_id, name, phone, email, address) VALUES
+(0, 'Alice Johnson', '1112223333', 'alice@example.com', '789 King Street, London'),
+(1, 'John Doe', '9876543210', 'johndoe@gmail.com', '123 Main Street, London'),
+(2, 'Alice Smith', '9123456780', 'alice.smith@yahoo.com', '456 Elm Avenue, Birmingham'),
+(3, 'Michael Brown', '9012345678', 'mikebrown@gmail.com', '789 Oak Lane, Manchester'),
+(4, 'Sophie Johnson', '9234567810', 'sophie.johnson@hotmail.com', '321 Pine Road, Leeds'),
+(5, 'David Wilson', '9345678901', 'david.w@gmail.com', '654 Maple Drive, Glasgow');
+
+
+##payment table
+CREATE TABLE payment (
+    payment_id INT PRIMARY KEY,
+    booking_id INT,
+    amount DECIMAL(10,2),
+    payment_date DATE,
+    payment_method VARCHAR(50)
+);
+
+Insertion of Data
+INSERT INTO payment (payment_id, booking_id, amount, payment_date, payment_method) VALUES
+(6, 6, 320.00, '2025-08-02', 'Credit Card'),
+(7, 7, 240.00, '2025-06-11', 'Cash'),
+(8, 8, 750.00, '2025-07-21', 'Debit Card'),
+(9, 9, 390.00, '2025-08-06', 'UPI'),
+(10, 10, 560.00, '2025-09-13', 'Net Banking');
+
+##room table 
+CREATE TABLE room (
+    room_id INT PRIMARY KEY,
+    room_number INT,
+    room_type VARCHAR(50),
+    price DECIMAL(10,2),
+    availability BOOLEAN
+);
+
+Insertion Of Data
+INSERT INTO room (room_id, room_number, room_type, price, availability) VALUES
+(1, 101, 'Single', 80.00, 1),
+(2, 102, 'Double', 120.00, 1),
+(3, 201, 'Suite', 250.00, 0),
+(4, 202, 'Double', 130.00, 1),
+(5, 301, 'Single', 85.00, 1);
+
+##staff table
+CREATE TABLE staff (
+    staff_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    position VARCHAR(50),
+    contact_info VARCHAR(100),
+    hire_date DATE
+);
+
+Insertion of Data
+INSERT INTO staff (staff_id, name, position, contact_info, hire_date) VALUES
+(1, 'Alice Johnson', 'Receptionist', 'alice.johnson@hotel.com', '2022-03-10'),
+(2, 'Bob Smith', 'Manager', 'bob.smith@hotel.com', '2021-07-22'),
+(3, 'Clara Lee', 'Housekeeping', 'clara.lee@hotel.com', '2023-01-15'),
+(4, 'David Kim', 'Maintenance', 'david.kim@hotel.com', '2020-11-30'),
+(5, 'Emma Davis', 'Concierge', 'emma.davis@hotel.com', '2022-06-18');
+
