@@ -1,0 +1,23 @@
+1.  vw_BookingDetailsWithGuestAndRoom 
+
+CREATE VIEW vw_BookingDetailsWithGuestAndRoom AS
+SELECT 
+    b.Booking_ID,
+    CONCAT(g.name) AS Guest_Name,
+    r.Room_Number,
+    r.Room_Type,
+    b.CheckIn_Date,
+    b.CheckOut_Date
+FROM booking b
+JOIN guest g ON b.Guest_ID = g.Guest_ID
+JOIN room r ON b.Room_ID = r.Room_ID;
+
+
+2. vw_TotalPaymentsByMethod
+
+CREATE VIEW vw_TotalPaymentsByMethod AS
+SELECT 
+    Payment_Method,
+    SUM(Amount) AS Total_Amount
+FROM payment
+GROUP BY Payment_Method;
